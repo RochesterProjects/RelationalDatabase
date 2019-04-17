@@ -53,6 +53,7 @@ void CP_insert(char* course, char* prereq){
 LinkedList CP_keyLookup(char* course, char* prereq){
 	LinkedList result = new_LinkedList();
 	int index = CP_hash(course, prereq);
+	if(CP_HASHTABLE[index] == NULL){return result;}
 	LinkedList_add_at_end(result, CP_HASHTABLE[index]);
 	return result;
 }
@@ -172,6 +173,10 @@ void CP_printSingle(CP_LIST node){
 }
 
 void CP_printList(LinkedList list){
+	if(LinkedList_isEmpty(list)){
+		printf("No such tuples\n");
+		return;
+	}
 	printf("Course \t Prerequiste\n");
 	LinkedListIterator iterator1 =  LinkedList_iterator(list);
 	while (LinkedListIterator_hasNext(iterator1)) {

@@ -67,11 +67,6 @@ void SNAP_insert(int id, char* name, char* address, char* phone){
 LinkedList SNAP_keyLookup(int id){
 	LinkedList result = new_LinkedList();
 	int index = SNAP_hash(id);
-	printf("lookup:: the hash for id %d is %d\n", id, index);
-	printf("This is the id being looked up: %d\n", SNAP_HASHTABLE[index]->studentID);
-	if(id == SNAP_HASHTABLE[index]->studentID){
-		printf("fuck  my life\n");
-	}
 	LinkedList_add_at_end(result, SNAP_HASHTABLE[index]);
 	return result;
 }
@@ -252,8 +247,7 @@ LinkedList SNAP_lookup(int id, char* name, char* address, char* phone){
 	return result; // will return empty linked list or a linked list of nodes that match criteria.
 }
 
-LinkedList SNAP_delete(int id, char* name, char* address, char* phone){
-	LinkedList result = new_LinkedList();
+void SNAP_delete(int id, char* name, char* address, char* phone){
 	if(id != 0 && name == NULL && address == NULL && phone == NULL){ //key is not empty, delete(id, *, *,*)
 		int index = SNAP_hash(id);
 		free(SNAP_HASHTABLE[index]);

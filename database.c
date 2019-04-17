@@ -12,58 +12,72 @@
 
 /**What grade did STUDENTNAME get in COURSENAME? */
 void query1(char* name, char* course){
-	char* result;
+	char* result = NULL;
 	LinkedList getName = SNAP_lookup(0, name, NULL, NULL);
-	SNAP_LIST snapNode = LinkedList_pop(getName);
-	int id = SNAP_getID(node);
-	printf("This is the ID found: %d\n", id);
-	LinkedList grades = CSG_lookup(NULL, id, NULL);
-	CSG_LIST csgNode = LinkedList_pop(grades);
-		if(csgNode == NULL){
-			printf("Parameters incorrect. (No course for this name)\n");
-			return;
-		}else{
-			result = CSG_getGrade(csgNode);
-			return;
+	if(!(LinkedList_isEmpty(getName))){
+		SNAP_LIST snapNode = LinkedList_pop(getName);	
+		int id = SNAP_getID(snapNode);
+		LinkedList grades = CSG_lookup(NULL, id, NULL);
+		if(!(LinkedList_isEmpty(grades))){
+			LinkedListIterator iterator = LinkedList_iterator(grades);
+			CSG_LIST csgNode;
+			while(LinkedListIterator_hasNext(iterator)){
+				CSG_LIST node = LinkedListIterator_next(iterator);
+				if(strcmp(CSG_getCourse(node),course) == 0){
+					csgNode = node;
+					result = CSG_getGrade(csgNode);
+				}
+			}
+			}
 		}
-	free(iterator1);
-	printf("%s got a %s in the course %s.\n", name, result,course);	
+		if(result != NULL){
+			printf("%s got a %s in the course %s.\n", name, result,course);
+		}else{printf("No grade. \n");}
 	}
+		
 	
 
 
 /** Where is STUDENTNAME at TIME on DAY?*/
 void query2(char* name, char* time, char day){
-	char* resultRoom;
-	char* course;
-	LinkedList getNames = SNAP_lookup(0, name, NULL, NULL);;
-	LinkedListIterator iterator1 = LinkedList_iterator(getNames);
-	while (LinkedListIterator_hasNext(iterator1)){
-		SNAP_LIST node = LinkedListIterator_next(iterator1);
-		int id = SNAP_getID(node);
-		LinkedList csgNodes = CSG_lookup(NULL, id,NULL);
-		CSG_LIST csgNode = LinkedList_pop(csgNodes);
-		course = CSG_getCourse(csgNode);
-	}
-	LinkedList tester = CDH_lookup(course,day,time);
-	CDH_LIST cdhNode = LinkedList_pop(tester);
-	//CDH_printList(tester);
-	if(cdhNode == NULL){
-		printf("No classes at given time and day and for given student.\n");
-	} else{
-		printf("here\n");
-		LinkedList crList = CR_lookup(course,NULL);
-		CR_LIST node = LinkedList_pop(crList);
-		//printf("fucko ducko, %s\n", CR_getRoom(node));
-		resultRoom = CR_getRoom(node);  //we need to check if a class is actually taking place during the given time and day.
+	char* resultRoom = NULL;
+	char* currentCourse = NULL;
+	LinkedList getName = SNAP_lookup(0, name, NULL, NULL);
+	if(!(LinkedList_isEmpty(getName))){
+		SNAP_LIST snapNode = LinkedList_pop(getName);
+		int id = SNAP_getID(snapNode);
+		LinkedList grades = CSG_lookup(NULL, id, NULL);
+		LinkedListIterator iterator = LinkedList_iterator(grades);
+		CSG_LIST csgNode;
+		while(LinkedListIterator_hasNext(iterator)){
+			CSG_LIST node = LinkedListIterator_next(iterator);
+			currentCourse = CSG_getCourse(node);
+			LinkedList cdhList = CDH_lookup(currentCourse, '*',NULL);
+			LinkedListIterator cdh_iterator = LinkedList_iterator(cdhList);
+			while(LinkedListIterator_hasNext(cdh_iterator)){
+				CDH_LIST cdhNode = LinkedListIterator_next(cdh_iterator);
+				char* cdhTime = CDH_getHour(cdhNode);
+				char cdhDay = CDH_getDay(cdhNode);
+				if(strcmp(cdhTime, time) == 0 && cdhDay == day){
+					LinkedList cr_list = CR_lookup(currentCourse, NULL);
+					LinkedListIterator cr_iterator = LinkedList_iterator(cr_list);
+					while(LinkedListIterator_hasNext(cr_iterator)){
+						CR_LIST crNode = LinkedListIterator_next(cr_iterator);
+						resultRoom = CR_getRoom(crNode);
+						printf("%s is in room %s on %s on day %c.\n ", name, resultRoom, time,day);
+						return;
+					}
+				}
+			}
+			
+		}	
 
-		printf("%s is at %s room at %s time on %c day.\n", name,resultRoom,time,day);
 	}
-	
-
+	printf("No such name,hour, or day combination.\n");
 }
 
 int main(){
+	printf("These are the full tables:\n");
 	SNAP_insert(12345,"C.Brown", "12 Apple St.", "555-1234");
 	SNAP_insert(67890,"L.Van Pelt", "34 Pear Ave.", "555-5678");
 	SNAP_insert(22222,"P. Patty", "56 Grape Blvd.", "555-9999");
@@ -100,9 +114,54 @@ int main(){
 	CDH_insert("EE200", 'R', "10AM");
 	CDH_print();
 
+	printf("Showing Functionality of Example 8.2:\n");
+	LinkedList lookup1 = CSG_lookup("CS101", 12345, NULL);
+	printf("lookup((\"CS101\", 12345, \"*\"), Course-Student-Grade)\nResult:\n");
+	CSG_printList(lookup1);
+
+	LinkedList lookup2 = CP_lookup("CS205", "CS120");
+	printf("lookup((\"CS205\",\"CS120\"), Course-Prerequiste)\nResult:\n");
+	CP_printList(lookup2);
+
+	printf("delete((\"CS101\",\"*\"), Course-Room)\n");
+	CR_delete("CS101", NULL);
+	printf("Updated CR table:\n");
+	CR_print();
+
+	printf("insert((\"CS205\",\"CS120\"), Course-Prerequiste)\nResult:\n");
+	CP_insert("CS205", "CS120");
+	CP_print();
+
+	printf("insert((\"CS205\",\"CS101\"), Course-Prerequiste)\nResult(should have no effect on relation):\n");
+	CP_insert("CS205", "CS101");
+	CP_print();
+
+
 	printf("\n\nTesting part two\n");
-	query1("C.Brown", "CS101");
-	query2("L. Van Pelt","9AM", 'M');
+	//get user input 
+	printf("QUERY1: What grade did STUDENTNAME get in COURSENAME?\nPlease enter a name:");
+	char* nameInput = (char*)malloc(20 * sizeof(char));
+	fgets(nameInput,20,stdin);
+	strtok(nameInput, "\n");
+	printf("Please enter a course: ");
+	char* courseInput = (char*)malloc(5 * sizeof(char));
+	fgets(courseInput,6,stdin);
+	strtok(courseInput, "\n");
+	query1(nameInput, courseInput);
+
+	
+	printf("QUERY2: What room is STUDENTNAME at HOUR on DAY?\nPlease enter a name:");
+	char* nameInput2 = (char*)malloc(20 * sizeof(char));
+	fgets(nameInput2,20,stdin);
+	strtok(nameInput2, "\n");
+	printf("\nPlease enter an hour: ");
+	char* hourInput = (char*)malloc(5 * sizeof(char));
+	fgets(hourInput,5,stdin);
+	strtok(hourInput, "\n");
+	printf("\nPlease enter a day: ");
+	char dayInput;
+	scanf(" %c", &dayInput);
+	query2(nameInput2,hourInput, dayInput);
 
 
 	

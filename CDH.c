@@ -37,6 +37,14 @@ int CDH_hash(char* course, char day, char* hour){
 	return sum % 1009;
 }
 
+char CDH_getDay(CDH_LIST this){
+	return this->day;
+}
+
+char* CDH_getHour(CDH_LIST this){
+	return this->hour;
+}
+
 
 void CDH_insert(char* course, char day, char* hour){
 	CDH_LIST this = new_CDH(course,day,hour);
@@ -60,7 +68,6 @@ LinkedList CDH_keyLookup(char* course, char day, char* hour){
 }
 
 LinkedList CDH_lookup(char* course, char day , char* hour){
-	printf("looking up for this course, day and hour: %s, %c, %s \n", course,day,hour);
 	LinkedList result = new_LinkedList();
 	if(course != NULL && day != '*' && hour != NULL){ //key is not empty, lookup(course, day, hour)
 		return CDH_keyLookup(course,day,hour);
