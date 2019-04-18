@@ -301,7 +301,7 @@ int main(){
 
 	CR_insert("CS101", "Turing Aud.");//to re add the one we deleted.
 
-	/*
+	
 
 	printf("\n\nTesting part two\n");
 	//get user input 
@@ -328,11 +328,15 @@ int main(){
 	char dayInput;
 	scanf(" %c", &dayInput);
 	query2(nameInput2,hourInput, dayInput);
-	*/
+	
 	printf("\n\nTesting part three\n");
+	printf("To test Select\n");
 	selectCourse("CS101");
+	printf("To test project\n");
     projectStudentID_selectCourse("CS101");
+    printf("Joining CDH and CR...Resulting Relation CRDH:\n");
    	join_CDH_CR_onCourse();
+   	printf("Projecting Day and Hour for Room = \"Turing Aud.\" on CRDH\n");
    	projectDayHour_CDH_CR("Turing Aud.");
 
 
