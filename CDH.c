@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "LinkedList.h"
-
 /** relation for Course-Day-Hour */
 typedef struct CDH *CDH_LIST;
 struct CDH{
@@ -12,9 +11,50 @@ struct CDH{
 	char* hour;
 	LinkedList collisions;
 };
-
 CDH_LIST CDH_HASHTABLE[1009];
 
+
+void CDH_write()
+{
+    FILE *f = fopen("CDH.txt", "w");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    
+    for(int i = 0; i < 1009; i++)
+    {
+        if(CDH_HASHTABLE[i] != NULL){
+            char text[50];
+            sprintf(text, "%s \t %c \t %s\n", CDH_HASHTABLE[i]->course, CDH_HASHTABLE[i]->day, CDH_HASHTABLE[i]->hour);
+            fprintf(f, "%s\n", text);
+        }
+    }
+    
+    fclose(f);
+}
+
+void CDH_read()
+{
+    printf("Course \t Day \t Hour\n");
+    char ch;
+    FILE *f;
+    
+    
+    f = fopen("CDH.txt", "r");
+    
+    if (f == NULL)
+    {
+        perror("Error while opening the file.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    while((ch = fgetc(f)) != EOF)
+        printf("%c", ch);
+    
+    fclose(f);
+}
 CDH_LIST new_CDH(char* course, char day, char* hour){
 	CDH_LIST this = (CDH_LIST)malloc(sizeof(CDH_LIST));
 	this->course = course;
@@ -23,7 +63,6 @@ CDH_LIST new_CDH(char* course, char day, char* hour){
 	this->collisions = new_LinkedList();
 	return this;
 }
-
 int CDH_hash(char* course, char day, char* hour){
 	int sum = 0;
 	char* c;
@@ -36,19 +75,15 @@ int CDH_hash(char* course, char day, char* hour){
 	sum += (int) day;
 	return sum % 1009;
 }
-
 char* CDH_getCourse(CDH_LIST this){
 	return this->course;
 }
-
 char CDH_getDay(CDH_LIST this){
 	return this->day;
 }
-
 char* CDH_getHour(CDH_LIST this){
 	return this->hour;
 }
-
 
 void CDH_insert(char* course, char day, char* hour){
 	CDH_LIST this = new_CDH(course,day,hour);
@@ -62,7 +97,6 @@ void CDH_insert(char* course, char day, char* hour){
 		}else{LinkedList_add_at_end(node->collisions, this);}
 	}
 }
-
 /** specific lookup when using a key. */
 LinkedList CDH_keyLookup(char* course, char day, char* hour){
 	LinkedList result = new_LinkedList();
@@ -70,7 +104,6 @@ LinkedList CDH_keyLookup(char* course, char day, char* hour){
 	LinkedList_add_at_end(result, CDH_HASHTABLE[index]);
 	return result;
 }
-
 LinkedList CDH_lookup(char* course, char day , char* hour){
 	LinkedList result = new_LinkedList();
 	if(course != NULL && day != '*' && hour != NULL){ //key is not empty, lookup(course, day, hour)
@@ -174,7 +207,6 @@ LinkedList CDH_lookup(char* course, char day , char* hour){
 	}
 	return result; // will return null or a linked list of nodes that match criteria.
 }
-
 void CDH_delete(char* course, char day , char* hour){
 	if(course != NULL && day != '*' && hour != NULL){ //key is not empty, lookup(course, day, hour)
 		int index = CDH_hash(course,day,hour);
@@ -283,7 +315,6 @@ void CDH_delete(char* course, char day , char* hour){
 	if(course != NULL && day == '*' && hour == NULL){//lookup(course, *, *)
 		for(int i = 0; i < 1009; i++){
 			if(CDH_HASHTABLE[i] != NULL){
-
 				LinkedList list = CDH_HASHTABLE[i]->collisions;
 				LinkedListIterator iterator = LinkedList_iterator(list);
 				while (LinkedListIterator_hasNext(iterator)) {
@@ -302,7 +333,6 @@ void CDH_delete(char* course, char day , char* hour){
 		}
 	}
 }
-
 void CDH_print(){
 	printf("Course \t Day \t Hour\n");
 	for(int i = 0; i < 1009; i++){
@@ -321,7 +351,6 @@ void CDH_print(){
 		}
 	}
 }
-
 void CDH_printSingle(CDH_LIST node){
 	if(node == NULL){
 		printf("u fuckwad\n");
@@ -329,24 +358,19 @@ void CDH_printSingle(CDH_LIST node){
 	printf("%s \t %c \t %s\n", node->course, node->day, node->hour);
 }
 
-
 void CDH_printList(LinkedList list){
 	printf("Course \t Day \t Hour\n");
 	LinkedListIterator iterator1 =  LinkedList_iterator(list);
 	while (LinkedListIterator_hasNext(iterator1)) {
-
 		CDH_LIST node = LinkedListIterator_next(iterator1);
 		printf("got here\n");
 		CDH_printSingle(node);
 	}
 	//sfree(iterator1);
-
 }
-
 CDH_LIST* CDH_getAll(){
    return CDH_HASHTABLE;
 }
-
 
 /*
 int main(){
@@ -357,16 +381,12 @@ int main(){
 	CDH_insert("EE200", 'W', "1PM");
 	CDH_insert("EE200", 'R', "10AM");
 	CDH_print();
-
 	printf("----Lookup Test----\n");
 	LinkedList cs101 = CDH_lookup("CS101", 'M', "9AM"); //lookup(CS101, *, *)
-
 	CDH_printList(cs101);
-
 
 	printf("---Delete Test---\n");
 	CDH_delete("CS101", '*', NULL);
 	CDH_print();
-
 }
 */

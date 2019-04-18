@@ -10,6 +10,23 @@
 #include "CP.h"
 
 
+void write()
+{
+    CSG_write();
+    SNAP_write();
+    CDH_write();
+    CR_write();
+    CP_write();
+}
+
+void read()
+{
+    CSG_read();
+    SNAP_read();
+    CDH_read();
+    CR_read();
+    CP_read();
+}
 /**What grade did STUDENTNAME get in COURSENAME? */
 void query1(char* name, char* course){
 	char* result = NULL;
@@ -37,7 +54,6 @@ void query1(char* name, char* course){
 		
 	
 
-
 /** Where is STUDENTNAME at TIME on DAY?*/
 void query2(char* name, char* time, char day){
 	char* resultRoom = NULL;
@@ -48,7 +64,6 @@ void query2(char* name, char* time, char day){
 		int id = SNAP_getID(snapNode);
 		LinkedList grades = CSG_lookup(NULL, id, NULL);
 		LinkedListIterator iterator = LinkedList_iterator(grades);
-		CSG_LIST csgNode;
 		while(LinkedListIterator_hasNext(iterator)){
 			CSG_LIST node = LinkedListIterator_next(iterator);
 			currentCourse = CSG_getCourse(node);
@@ -64,24 +79,21 @@ void query2(char* name, char* time, char day){
 					while(LinkedListIterator_hasNext(cr_iterator)){
 						CR_LIST crNode = LinkedListIterator_next(cr_iterator);
 						resultRoom = CR_getRoom(crNode);
-						printf("%s is in room %s on %s on day %c.\n ", name, resultRoom, time,day);
+						printf("%s is in room %s on %s on day %c.\n", name, resultRoom, time,day);
 						return;
 					}
 				}
 			}
 			
 		}	
-
 	}
 	printf("No such name,hour, or day combination.\n");
 }
-
 void selectCourse(char* course)
 {
     LinkedList ll = CSG_lookup(course, 0, NULL);
     CSG_printList(ll);
 }
-
 void projectStudentID_selectCourse(char* course)
 {
     LinkedList ll = CSG_lookup(course, 0, NULL);
@@ -93,9 +105,7 @@ void projectStudentID_selectCourse(char* course)
     }
     free(iterator);
 }
-
 typedef struct CRDH *CRDH_LIST;
-
 struct CRDH{
     char* course;
     char* room;
@@ -103,9 +113,7 @@ struct CRDH{
     char* hour;
     LinkedList collisions;
 };
-
 CRDH_LIST CRDH_HASHTABLE[1009];
-
 CRDH_LIST new_CRDH(char* course, char* room, char day, char* hour){
     CRDH_LIST this = (CRDH_LIST)malloc(sizeof(struct CRDH));
     if(this == NULL){
@@ -118,7 +126,6 @@ CRDH_LIST new_CRDH(char* course, char* room, char day, char* hour){
     this->collisions = new_LinkedList();
     return this;
 }
-
 void free_CRDH(CRDH_LIST this){
     if(this == NULL){
         return;
@@ -126,15 +133,12 @@ void free_CRDH(CRDH_LIST this){
     free(this->collisions);
     free(this);
 }
-
 char CRDH_getDay(CRDH_LIST node){
     return node->day;
 }
-
 char* CRDH_getHour(CRDH_LIST node){
     return node->hour;
 }
-
 /** key is {course, student} */
 int CRDH_hash(char* course, char day, char* hour){
     int sum = 0;
@@ -148,14 +152,12 @@ int CRDH_hash(char* course, char day, char* hour){
     sum += (int) day;
     return sum % 1009;
 }
-
 /** if hashed index is empty, simply insert there. If there is value, add to then end of the linked list.
  If already in the list, dont add
  */
 void CRDH_printSingle(CRDH_LIST this){
 	printf("%s \t %s \t %c \t %s\n", this->course, this->room, this->day, this->hour);
 }
-
 void CRDH_print(){
     printf("Course \t Room \t Day \t Hour\n");
     for(int i = 0; i < 1009; i++){
@@ -165,15 +167,11 @@ void CRDH_print(){
         }
     }
 }
-
 void CRDH_insert(char* course, char* room, char day, char* hour){
     CRDH_LIST this = new_CRDH(course, room, day, hour);
     int index = CRDH_hash(course, day, hour);
-    printf("the hash index for %s course and %s room is: %d\n", course,room,index);
     if(CRDH_HASHTABLE[index] == NULL){
-        CRDH_HASHTABLE[index] = this;
-        //CRDH_printSingle(this);
-        printf("just inserted tuple with %s as its course, %c as its day, and %s as its room, and %s as the hour\n", this->course, this->day,this->room, this->hour);
+        CRDH_HASHTABLE[index] = this;   
     }else{
         CRDH_LIST node = CRDH_HASHTABLE[index];
         if(strcmp(node->course,course) == 0 && strcmp(node->room, room) == 0 && node->day == day && strcmp(node->hour, hour) == 0){
@@ -183,8 +181,6 @@ void CRDH_insert(char* course, char* room, char day, char* hour){
         }
     }
 }
-
-
 
 
 LinkedList CRDH_getAll()
@@ -200,22 +196,15 @@ LinkedList CRDH_getAll()
     return toReturn;
 }
 
-
 void join_CDH_CR_onCourse()
 {
     CDH_LIST* CDH_HASHTABLE = CDH_getAll();
     CR_LIST* CR_HASHTABLE = CR_getAll();
-
     for(int i = 0; i < 1009; i++){
     	for(int j = 0; j < 1009; j++){
     		if(*(CDH_HASHTABLE + i) != NULL && *(CR_HASHTABLE + j) != NULL){
     			CDH_LIST cdhNode = *(CDH_HASHTABLE + i);
-    			printf("CDHNODE:   ");
-    			CDH_printSingle(cdhNode);
-    			printf("\n");
     			CR_LIST crNode = *(CR_HASHTABLE + j);
-    			printf("CRNODE:     ");
-    			printf("\n");
     			if(strcmp(CDH_getCourse(cdhNode),CR_getCourse(crNode)) == 0){
     				CRDH_insert(CDH_getCourse(cdhNode), CR_getRoom(crNode), CDH_getDay(cdhNode), CDH_getHour(cdhNode));
     			}
@@ -223,8 +212,9 @@ void join_CDH_CR_onCourse()
     	}
     }
     CRDH_print();
+    free(CDH_HASHTABLE);
+    free(CR_HASHTABLE);
 }
-
 
 void projectDayHour_CDH_CR(char* room)
 {
@@ -238,14 +228,12 @@ void projectDayHour_CDH_CR(char* room)
     	}
     }
 }
-
 int main(){
 	printf("These are the full tables:\n");
 	SNAP_insert(12345,"C.Brown", "12 Apple St.", "555-1234");
 	SNAP_insert(67890,"L.Van Pelt", "34 Pear Ave.", "555-5678");
 	SNAP_insert(22222,"P. Patty", "56 Grape Blvd.", "555-9999");
 	SNAP_print();
-
 	CSG_insert("CS101", 12345, "A");
 	CSG_insert("CS101", 67890, "B");
 	CSG_insert("EE200", 12345, "C");
@@ -253,12 +241,10 @@ int main(){
 	CSG_insert("CS101", 33333, "A-");
 	CSG_insert("PH100", 67890, "C+");
 	CSG_print();
-
 	CR_insert("CS101", "Turing Aud.");
 	CR_insert("EE200", "25 Ohm Hall" );
 	CR_insert("PH100", "Newton Lab.");
 	CR_print();
-
 	CP_insert("CS101", "CS100");
 	CP_insert("EE200", "EE005");
 	CP_insert("EE200", "CS100");
@@ -268,7 +254,6 @@ int main(){
 	CP_insert("CS206", "CS121");
 	CP_insert("CS206", "CS205");
 	CP_print();
-
 	CDH_insert("CS101", 'M', "9AM");
 	CDH_insert("CS101", 'W', "9AM");
 	CDH_insert("CS101", 'F', "9AM");
@@ -276,55 +261,49 @@ int main(){
 	CDH_insert("EE200", 'W', "1PM");
 	CDH_insert("EE200", 'R', "10AM");
 	CDH_print();
-
 	printf("Showing Functionality of Example 8.2:\n");
 	LinkedList lookup1 = CSG_lookup("CS101", 12345, NULL);
 	printf("lookup((\"CS101\", 12345, \"*\"), Course-Student-Grade)\nResult:\n");
 	CSG_printList(lookup1);
-
 	LinkedList lookup2 = CP_lookup("CS205", "CS120");
 	printf("lookup((\"CS205\",\"CS120\"), Course-Prerequiste)\nResult:\n");
 	CP_printList(lookup2);
-
 	printf("delete((\"CS101\",\"*\"), Course-Room)\n");
 	CR_delete("CS101", NULL);
 	printf("Updated CR table:\n");
 	CR_print();
-
 	printf("insert((\"CS205\",\"CS120\"), Course-Prerequiste)\nResult:\n");
 	CP_insert("CS205", "CS120");
 	CP_print();
-
 	printf("insert((\"CS205\",\"CS101\"), Course-Prerequiste)\nResult(should have no effect on relation):\n");
 	CP_insert("CS205", "CS101");
 	CP_print();
-
 	CR_insert("CS101", "Turing Aud.");//to re add the one we deleted.
-
+	LinkedList_free(lookup1,false);
+	LinkedList_free(lookup2,false);
 	
-
 	printf("\n\nTesting part two\n");
 	//get user input 
 	printf("QUERY1: What grade did STUDENTNAME get in COURSENAME?\nPlease enter a name:");
 	char* nameInput = (char*)malloc(20 * sizeof(char));
 	fgets(nameInput,20,stdin);
 	strtok(nameInput, "\n");
-	printf("Please enter a course: ");
-	char* courseInput = (char*)malloc(5 * sizeof(char));
+	printf("\nPlease enter a course: ");
+	char* courseInput = (char*)malloc(6 * sizeof(char));
 	fgets(courseInput,6,stdin);
 	strtok(courseInput, "\n");
 	query1(nameInput, courseInput);
-
 	
-	printf("QUERY2: What room is STUDENTNAME at HOUR on DAY?\nPlease enter a name:");
+	printf("QUERY2: What room is STUDENTNAME at HOUR on DAY?\n");
+	printf("Please enter a name: \n");
 	char* nameInput2 = (char*)malloc(20 * sizeof(char));
-	fgets(nameInput2,20,stdin);
+	scanf(" %s", nameInput2);
 	strtok(nameInput2, "\n");
-	printf("\nPlease enter an hour: ");
-	char* hourInput = (char*)malloc(5 * sizeof(char));
-	fgets(hourInput,5,stdin);
+	printf("Please enter an hour: ");
+	char* hourInput = (char*)malloc(8 * sizeof(char));
+	scanf(" %s", hourInput);
 	strtok(hourInput, "\n");
-	printf("\nPlease enter a day: ");
+	printf("Please enter a day: ");
 	char dayInput;
 	scanf(" %c", &dayInput);
 	query2(nameInput2,hourInput, dayInput);
@@ -339,7 +318,16 @@ int main(){
    	printf("Projecting Day and Hour for Room = \"Turing Aud.\" on CRDH\n");
    	projectDayHour_CDH_CR("Turing Aud.");
 
-
-	
-
+	printf("Would you like to write relations to saved files?");
+	char firstResponse;
+	scanf(" %c", &firstResponse);
+	if(firstResponse == 'y'){
+		write();
+	}
+	printf("Would you like to read the saved files relations?\n");
+	char secondResponse;
+	scanf(" %c", &secondResponse);
+	if(secondResponse == 'y'){
+		read();
+	}
 }

@@ -5,8 +5,6 @@
 #include "LinkedList.h"
 
 
-
-
 /** relation for Course- Prerequiste */
 typedef struct CP *CP_LIST;
 struct CP{
@@ -14,9 +12,49 @@ struct CP{
 	char* prereq;
 	LinkedList collisions;
 };
-
 CP_LIST CP_HASHTABLE[1009];
 
+void CP_write()
+{
+    FILE *f = fopen("CP.txt", "w");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    
+    for(int i = 0; i < 1009; i++)
+    {
+        if(CP_HASHTABLE[i] != NULL){
+            char text[50];
+            sprintf(text, "%s \t %s\n", CP_HASHTABLE[i]->course, CP_HASHTABLE[i]->prereq);
+            fprintf(f, "%s\n", text);
+        }
+    }
+    
+    fclose(f);
+}
+
+void CP_read()
+{
+    printf("Course \t Prerequisite\n");
+    char ch;
+    FILE *f;
+    
+    
+    f = fopen("CP.txt", "r");
+    
+    if (f == NULL)
+    {
+        perror("Error while opening the file.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    while((ch = fgetc(f)) != EOF)
+        printf("%c", ch);
+    
+    fclose(f);
+}
 CP_LIST new_CP(char* course, char* prereq){
 	CP_LIST this = (CP_LIST)malloc(sizeof(CP_LIST));
 	this->course = course;
@@ -24,7 +62,6 @@ CP_LIST new_CP(char* course, char* prereq){
 	this->collisions = new_LinkedList();
 	return this;
 }
-
 int CP_hash(char* course, char* prereq){
 	int sum = 0;
 	char* c;
@@ -36,7 +73,6 @@ int CP_hash(char* course, char* prereq){
 	}
 	return sum % 1009;
 }
-
 void CP_insert(char* course, char* prereq){
 	CP_LIST this = new_CP(course,prereq);
 	int index = CP_hash(course,prereq);
@@ -49,7 +85,6 @@ void CP_insert(char* course, char* prereq){
 		}else{LinkedList_add_at_end(node->collisions, this);}
 	}
 }
-
 LinkedList CP_keyLookup(char* course, char* prereq){
 	LinkedList result = new_LinkedList();
 	int index = CP_hash(course, prereq);
@@ -57,7 +92,6 @@ LinkedList CP_keyLookup(char* course, char* prereq){
 	LinkedList_add_at_end(result, CP_HASHTABLE[index]);
 	return result;
 }
-
 LinkedList CP_lookup(char* course, char* prereq){
 	LinkedList result = new_LinkedList();
 	if(course != NULL && prereq != NULL){
@@ -96,9 +130,7 @@ LinkedList CP_lookup(char* course, char* prereq){
 		}
 	}
 	return result;
-
 }
-
 void CP_delete(char* course, char* prereq){
 	LinkedList result = new_LinkedList();
 	if(course != NULL && prereq != NULL){
@@ -145,9 +177,7 @@ void CP_delete(char* course, char* prereq){
 			}
 		}
 	}
-
 }
-
 void CP_print(){
 	printf("Course \t Prerequiste\n");
 	for(int i = 0; i < 1009; i++){
@@ -166,12 +196,9 @@ void CP_print(){
 		}
 	}
 }
-
 void CP_printSingle(CP_LIST node){
 	printf("%s \t %s\n", node->course, node->prereq);
-
 }
-
 void CP_printList(LinkedList list){
 	if(LinkedList_isEmpty(list)){
 		printf("No such tuples\n");
@@ -184,9 +211,7 @@ void CP_printList(LinkedList list){
 		CP_printSingle(node);
 	}
 	free(iterator1);
-
 }
-
 /*
 int  main(){
 	CP_insert("CS101", "CS100");
@@ -198,7 +223,6 @@ int  main(){
 	CP_insert("CS206", "CS121");
 	CP_insert("CS206", "CS205");
 	CP_print();
-
 	printf("----Lookup Test----\n");
 	LinkedList cs101 = CP_lookup("CS101", NULL); //lookup(CS101, *)
 	CP_printList(cs101);

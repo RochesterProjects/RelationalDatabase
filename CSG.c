@@ -58,6 +58,41 @@ int CSG_hash(char* course, int id){
 	return sum % 1009;
 }
 
+void CSG_write(){
+    FILE *f = fopen("CSG.txt", "w");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    for(int i = 0; i < 1009; i++)
+    {
+        if(CSG_HASHTABLE[i] != NULL){
+           char text[50];
+            sprintf(text, "%s \t %d \t %s\n", CSG_HASHTABLE[i]->course, CSG_HASHTABLE[i]->studentID, CSG_HASHTABLE[i]->grade);
+            fprintf(f, "%s\n", text);
+        }
+    }
+    fclose(f);
+}
+
+
+void CSG_read()
+{
+    printf("Course \t Student-ID \t Grade\n");
+    char ch;
+    FILE *f;
+    f = fopen("CSG.txt", "r");
+    if (f == NULL)
+    {
+        perror("Error while opening the file.\n");
+        exit(EXIT_FAILURE);
+    }
+    while((ch = fgetc(f)) != EOF)
+        printf("%c", ch);
+    fclose(f);
+}
+
 /** if hashed index is empty, simply insert there. If there is value, add to then end of the linked list.
 If already in the list, dont add
  */

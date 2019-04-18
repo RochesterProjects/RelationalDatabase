@@ -4,18 +4,55 @@
 #include <string.h>
 #include "LinkedList.h"
 
-
 typedef struct CR *CR_LIST;
-
 /** relation for Course-Room */
 struct CR{
 	char* course;
 	char* room;
 	LinkedList collisions;
 };
-
 CR_LIST CR_HASHTABLE[1009];
+void CR_write()
+{
+    FILE *f = fopen("CR.txt", "w");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    
+    for(int i = 0; i < 1009; i++)
+    {
+        if(CR_HASHTABLE[i] != NULL){
+            char text[50];
+            sprintf(text, "%s \t %s\n", CR_HASHTABLE[i]->course, CR_HASHTABLE[i]->room);
+            fprintf(f, "%s\n", text);
+        }
+    }
+    
+    fclose(f);
+}
 
+void CR_read()
+{
+    printf("Course \t Room\n");
+    char ch;
+    FILE *f;
+    
+    
+    f = fopen("CR.txt", "r");
+    
+    if (f == NULL)
+    {
+        perror("Error while opening the file.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    while((ch = fgetc(f)) != EOF)
+        printf("%c", ch);
+    
+    fclose(f);
+}
 CR_LIST new_CR(char* course, char* room){
 	CR_LIST this = (CR_LIST)malloc(sizeof(CR_LIST));
 	this->course = course;
@@ -23,7 +60,6 @@ CR_LIST new_CR(char* course, char* room){
 	this->collisions = new_LinkedList();
 	return this;
 }
-
 int CR_hash(char* course){
 	int sum = 0;
 	char* c;
@@ -32,11 +68,9 @@ int CR_hash(char* course){
 	}
 	return sum % 1009;
 }
-
 char* CR_getRoom(CR_LIST node){
 	return node->room;
 }
-
 char* CR_getCourse(CR_LIST node){
 	return node->course;
 }
@@ -52,14 +86,12 @@ void CR_insert(char* course, char* room){
 		}else{LinkedList_add_at_end(node->collisions, this);}
 	}
 }
-
 LinkedList CR_keyLookup(char* course){
 	LinkedList result = new_LinkedList();
 	int index = CR_hash(course);
 	LinkedList_add_at_end(result, CR_HASHTABLE[index]);
 	return result;
 }
-
 LinkedList CR_lookup(char* course, char* room){
 	LinkedList result = new_LinkedList();
 	if(course != NULL && room != NULL){
@@ -93,7 +125,6 @@ LinkedList CR_lookup(char* course, char* room){
 	}
 	return result;
 }
-
 void CR_delete(char* course, char* room){
 	LinkedList result = new_LinkedList();
 	if(course != NULL && room != NULL){
@@ -128,18 +159,14 @@ void CR_delete(char* course, char* room){
 		CR_HASHTABLE[index] = NULL;
 	}
 }
-
 CR_LIST* CR_getAll()
 {
     return CR_HASHTABLE;
 }
 
-
-
 void CR_printSingle(CR_LIST node){
 	printf("%s \t %s\n", node->course, node->room);
 }
-
 void CR_printList(LinkedList list){
 	printf("Course \t Room\n");
 	LinkedListIterator iterator1 =  LinkedList_iterator(list);
@@ -148,9 +175,7 @@ void CR_printList(LinkedList list){
 		CR_printSingle(node);
 	}
 	free(iterator1);
-
 }
-
 void CR_print(){
 	printf("Course \t Room\n");
 	for(int i = 0; i < 1009; i++){
@@ -170,15 +195,12 @@ void CR_print(){
 	}
 }
 
-
-
 /*
 int main(){
 	CR_insert("CS101", "Turing Aud.");
 	CR_insert("EE200", "25 Ohm Hall" );
 	CR_insert("PH100", "Newton Lab.");
 	CR_print();
-
 	printf("----Lookup Test----\n");
 	LinkedList cs101 = CR_lookup("CS101", NULL); //lookup(CS101, *)
 	CR_printList(cs101);

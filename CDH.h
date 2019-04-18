@@ -12,6 +12,10 @@ extern int CDH_hash(char* course, char day, char* hour);
 
 extern char CDH_getDay(CDH_LIST this);
 
+extern void CDH_write();
+
+extern void CDH_read();
+
 extern char* CDH_getHour(CDH_LIST this);
 
 extern char* CDH_getCourse(CDH_LIST this);

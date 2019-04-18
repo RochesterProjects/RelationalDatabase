@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "LinkedList.h"
-
 /* relation for StudentID-Name-Address-Phone */
 typedef struct SNAP *SNAP_LIST;
 struct SNAP{
@@ -13,10 +12,45 @@ struct SNAP{
 	char* phone;
 	LinkedList collisions;
 };
-
 SNAP_LIST SNAP_HASHTABLE[1009];
 
+void SNAP_write()
+{    FILE *f = fopen("SNAP.txt", "w");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    
+    for(int i = 0; i < 1009; i++)
+    {
+        if(SNAP_HASHTABLE[i] != NULL){
+            char text[50];
+            sprintf(text, "%d \t %s \t %s \t %s\n", SNAP_HASHTABLE[i]->studentID, SNAP_HASHTABLE[i]->name, SNAP_HASHTABLE[i]->address, SNAP_HASHTABLE[i]->phone);
+            fprintf(f, "%s\n", text);
+        }
+    }
+    fclose(f);
+}
 
+void SNAP_read()
+{
+    printf("Student-ID \t Name \t Address \t Phone\n");
+    char ch;
+    FILE *f;
+    f = fopen("SNAP.txt", "r");
+    
+    if (f == NULL)
+    {
+        perror("Error while opening the file.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    while((ch = fgetc(f)) != EOF)
+        printf("%c", ch);
+    
+    fclose(f);
+}
 SNAP_LIST new_SNAP(int id,char* name, char* address, char* phone){
 	SNAP_LIST this =  (SNAP_LIST)malloc(sizeof(struct SNAP));
 	if(this == NULL){
@@ -29,7 +63,6 @@ SNAP_LIST new_SNAP(int id,char* name, char* address, char* phone){
 	this->collisions = new_LinkedList();
 	return this;
 }
-
 void free_SNAP(SNAP_LIST this){
 	if(this == NULL){
 		return;
@@ -37,7 +70,6 @@ void free_SNAP(SNAP_LIST this){
 	free(this->collisions);
 	free(this); 
 }
-
 int SNAP_getID(SNAP_LIST this){
 	return this->studentID;
 }
@@ -45,14 +77,12 @@ int SNAP_getID(SNAP_LIST this){
 int SNAP_hash(int id){
 	return id % 1009;
 }
-
 /** if hashed index is empty, simply insert there. If there is value, add to then end of the linked list.
 If already in the list, dont add
  */
 void SNAP_insert(int id, char* name, char* address, char* phone){
 	SNAP_LIST this = new_SNAP(id,name,address,phone);
 	int index = SNAP_hash(id);
-	printf("insert:: the hash for id %d is %d\n ", id, index);
 	if(SNAP_HASHTABLE[index] == NULL){
 		SNAP_HASHTABLE[index] = this;
 	}else{
@@ -62,7 +92,6 @@ void SNAP_insert(int id, char* name, char* address, char* phone){
 		}else{LinkedList_add_at_end(node->collisions, this);}
 	}
 }
-
 /** specific lookup when using a key. */
 LinkedList SNAP_keyLookup(int id){
 	LinkedList result = new_LinkedList();
@@ -70,7 +99,6 @@ LinkedList SNAP_keyLookup(int id){
 	LinkedList_add_at_end(result, SNAP_HASHTABLE[index]);
 	return result;
 }
-
 LinkedList SNAP_lookup(int id, char* name, char* address, char* phone){
 	LinkedList result = new_LinkedList();
 	if(id != 0 && name == NULL && address == NULL && phone == NULL){ //key is not empty, lookup(id, *, *,*)
@@ -246,7 +274,6 @@ LinkedList SNAP_lookup(int id, char* name, char* address, char* phone){
 	}
 	return result; // will return empty linked list or a linked list of nodes that match criteria.
 }
-
 void SNAP_delete(int id, char* name, char* address, char* phone){
 	if(id != 0 && name == NULL && address == NULL && phone == NULL){ //key is not empty, delete(id, *, *,*)
 		int index = SNAP_hash(id);
@@ -483,7 +510,6 @@ void SNAP_delete(int id, char* name, char* address, char* phone){
 		}
 	}
 }
-
 void SNAP_print(){
 	printf("Student-ID\tName\tAddress\tPhone\n");
 	for(int i = 0; i < 1009; i++){
@@ -493,11 +519,9 @@ void SNAP_print(){
 		}
 	}
 }
-
 void SNAP_printSingle(SNAP_LIST this){
 	printf("%d \t %s\t %s\t %s\n", this->studentID, this->name, this->address, this->phone);
 }
-
 void SNAP_printList(LinkedList list){
 	printf("Student-ID\tName\tAddress\tPhone\n");
 	LinkedListIterator iterator2 =  LinkedList_iterator(list);
@@ -507,7 +531,6 @@ void SNAP_printList(LinkedList list){
 	}
 	free(iterator2);
 }																				
-
 /*int main(){
 	printf("------TESTING SNAP--------");
 	SNAP_insert(12345,"C.Brown", "12 Apple St.", "555-1234");
@@ -515,7 +538,6 @@ void SNAP_printList(LinkedList list){
 	SNAP_insert(22222,"P. Patty", "56 Grape Blvd.", "555-9999");
 	printf("Finished inserting\n");
 	SNAP_print();
-
 	
 	LinkedList test = SNAP_lookup(12345,NULL,NULL,NULL); //lookup(12345, *, *,*,)
 	SNAP_printList(test);
@@ -523,6 +545,5 @@ void SNAP_printList(LinkedList list){
 	printf("\nDELete TEST\n\n");
 	SNAP_delete(12345,NULL,NULL,NULL);
 	SNAP_print();
-
 
 }*/

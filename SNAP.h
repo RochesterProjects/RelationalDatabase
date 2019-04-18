@@ -10,6 +10,10 @@ extern SNAP_LIST new_SNAP(int id,char* name, char* address, char* phone);
 
 extern int SNAP_hash(int id);
 
+extern void SNAP_write();
+
+extern void SNAP_read();
+
 extern int SNAP_getID(SNAP_LIST list);
 
 extern void SNAP_insert(int id, char* name, char* address, char* phone);

@@ -11,6 +11,10 @@ extern CR_LIST new_CR(char* course, char* room);
 
 extern int CR_hash(char* course);
 
+extern void CR_write();
+
+extern void CR_read();
+
 extern char* CR_getRoom(CR_LIST node);
 
 extern char* CR_getCourse(CR_LIST node);

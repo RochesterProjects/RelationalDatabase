@@ -17,6 +17,10 @@ extern int CSG_getStudentID(CSG_LIST node);
 
 extern int CSG_hash(char* course, int id);
 
+extern void CSG_write();
+
+extern void CSG_read();
+
 extern void CSG_insert(char* course, int id, char* grade);
 
 extern LinkedList CSG_keyLookup(char* course, int id);

@@ -11,6 +11,9 @@ extern CP_LIST new_CP(char* course, char* prereq);
 
 extern int CP_hash(char* course);
 
+extern void CP_write();
+
+extern void CP_read();
 
 extern void CP_insert(char* course, char* prereq);
 
