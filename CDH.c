@@ -37,6 +37,10 @@ int CDH_hash(char* course, char day, char* hour){
 	return sum % 1009;
 }
 
+char* CDH_getCourse(CDH_LIST this){
+	return this->course;
+}
+
 char CDH_getDay(CDH_LIST this){
 	return this->day;
 }
@@ -322,7 +326,6 @@ void CDH_printSingle(CDH_LIST node){
 	if(node == NULL){
 		printf("u fuckwad\n");
 	}
-	printf("node->course: %s", node->course);
 	printf("%s \t %c \t %s\n", node->course, node->day, node->hour);
 }
 
@@ -339,6 +342,11 @@ void CDH_printList(LinkedList list){
 	//sfree(iterator1);
 
 }
+
+CDH_LIST* CDH_getAll(){
+   return CDH_HASHTABLE;
+}
+
 
 /*
 int main(){

@@ -13,6 +13,8 @@ extern char* CSG_getGrade(CSG_LIST node);
 
 extern char* CSG_getCourse(CSG_LIST node);
 
+extern int CSG_getStudentID(CSG_LIST node);
+
 extern int CSG_hash(char* course, int id);
 
 extern void CSG_insert(char* course, int id, char* grade);

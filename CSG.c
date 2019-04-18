@@ -43,6 +43,10 @@ char* CSG_getGrade(CSG_LIST node){
 char* CSG_getCourse(CSG_LIST node){
 	return node->course;
 }
+
+int CSG_getStudentID(CSG_LIST node){
+	return node->studentID;
+}
 /** key is {course, student} */
 int CSG_hash(char* course, int id){
 	int sum = 0;

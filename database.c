@@ -76,6 +76,169 @@ void query2(char* name, char* time, char day){
 	printf("No such name,hour, or day combination.\n");
 }
 
+void selectCourse(char* course)
+{
+    LinkedList ll = CSG_lookup(course, 0, NULL);
+    CSG_printList(ll);
+}
+
+void projectStudentID_selectCourse(char* course)
+{
+    LinkedList ll = CSG_lookup(course, 0, NULL);
+    printf("Student ID \n");
+    LinkedListIterator iterator = LinkedList_iterator(ll);
+    while(LinkedListIterator_hasNext(iterator))
+    {
+        printf("%d \n", CSG_getStudentID(LinkedListIterator_next(iterator)));
+    }
+    free(iterator);
+}
+
+typedef struct CRDH *CRDH_LIST;
+
+struct CRDH{
+    char* course;
+    char* room;
+    char day;
+    char* hour;
+    LinkedList collisions;
+};
+
+CRDH_LIST CRDH_HASHTABLE[1009];
+
+CRDH_LIST new_CRDH(char* course, char* room, char day, char* hour){
+    CRDH_LIST this = (CRDH_LIST)malloc(sizeof(struct CRDH));
+    if(this == NULL){
+        return NULL; //out of memory
+    }
+    this->course = course;
+    this->room = room;
+    this->day = day;
+    this->hour = hour;
+    this->collisions = new_LinkedList();
+    return this;
+}
+
+void free_CRDH(CRDH_LIST this){
+    if(this == NULL){
+        return;
+    }
+    free(this->collisions);
+    free(this);
+}
+
+char CRDH_getDay(CRDH_LIST node){
+    return node->day;
+}
+
+char* CRDH_getHour(CRDH_LIST node){
+    return node->hour;
+}
+
+/** key is {course, student} */
+int CRDH_hash(char* course, char day, char* hour){
+    int sum = 0;
+    char* c;
+    for(c = course; *c != '\0'; c++){
+        sum += (int) *c;
+    }
+    for(c = hour; *c != '\0'; c++){
+        sum += (int) *c;
+    }
+    sum += (int) day;
+    return sum % 1009;
+}
+
+/** if hashed index is empty, simply insert there. If there is value, add to then end of the linked list.
+ If already in the list, dont add
+ */
+void CRDH_printSingle(CRDH_LIST this){
+	printf("%s \t %s \t %c \t %s\n", this->course, this->room, this->day, this->hour);
+}
+
+void CRDH_print(){
+    printf("Course \t Room \t Day \t Hour\n");
+    for(int i = 0; i < 1009; i++){
+        if(CRDH_HASHTABLE[i] != NULL){
+            CRDH_LIST row = CRDH_HASHTABLE[i];
+            printf("%s \t %s \t %c \t %s\n", row->course, row->room, row->day, row->hour);
+        }
+    }
+}
+
+void CRDH_insert(char* course, char* room, char day, char* hour){
+    CRDH_LIST this = new_CRDH(course, room, day, hour);
+    int index = CRDH_hash(course, day, hour);
+    printf("the hash index for %s course and %s room is: %d\n", course,room,index);
+    if(CRDH_HASHTABLE[index] == NULL){
+        CRDH_HASHTABLE[index] = this;
+        //CRDH_printSingle(this);
+        printf("just inserted tuple with %s as its course, %c as its day, and %s as its room, and %s as the hour\n", this->course, this->day,this->room, this->hour);
+    }else{
+        CRDH_LIST node = CRDH_HASHTABLE[index];
+        if(strcmp(node->course,course) == 0 && strcmp(node->room, room) == 0 && node->day == day && strcmp(node->hour, hour) == 0){
+            printf("Tuple already in relation.\n");
+        }else{
+        	LinkedList_add_at_end(node->collisions, this);
+        }
+    }
+}
+
+
+
+
+LinkedList CRDH_getAll()
+{
+    LinkedList toReturn = new_LinkedList();
+    for(int i = 0; i < 1009; i++)
+    {
+        if(CRDH_HASHTABLE[i] != NULL)
+        {
+            LinkedList_add_at_end(toReturn, CRDH_HASHTABLE[i]);
+        }
+    }
+    return toReturn;
+}
+
+
+void join_CDH_CR_onCourse()
+{
+    CDH_LIST* CDH_HASHTABLE = CDH_getAll();
+    CR_LIST* CR_HASHTABLE = CR_getAll();
+
+    for(int i = 0; i < 1009; i++){
+    	for(int j = 0; j < 1009; j++){
+    		if(*(CDH_HASHTABLE + i) != NULL && *(CR_HASHTABLE + j) != NULL){
+    			CDH_LIST cdhNode = *(CDH_HASHTABLE + i);
+    			printf("CDHNODE:   ");
+    			CDH_printSingle(cdhNode);
+    			printf("\n");
+    			CR_LIST crNode = *(CR_HASHTABLE + j);
+    			printf("CRNODE:     ");
+    			printf("\n");
+    			if(strcmp(CDH_getCourse(cdhNode),CR_getCourse(crNode)) == 0){
+    				CRDH_insert(CDH_getCourse(cdhNode), CR_getRoom(crNode), CDH_getDay(cdhNode), CDH_getHour(cdhNode));
+    			}
+    		}
+    	}
+    }
+    CRDH_print();
+}
+
+
+void projectDayHour_CDH_CR(char* room)
+{
+	printf("Day \t Hour\n");
+    for(int i = 0; i < 1009; i++){
+    	if(CRDH_HASHTABLE[i] != NULL){
+    		CRDH_LIST node = CRDH_HASHTABLE[i];
+    		if(strcmp(node->room, room) == 0){
+    			printf("%c \t %s\n", node->day, node->hour);
+    		}
+    	}
+    }
+}
+
 int main(){
 	printf("These are the full tables:\n");
 	SNAP_insert(12345,"C.Brown", "12 Apple St.", "555-1234");
@@ -136,6 +299,9 @@ int main(){
 	CP_insert("CS205", "CS101");
 	CP_print();
 
+	CR_insert("CS101", "Turing Aud.");//to re add the one we deleted.
+
+	/*
 
 	printf("\n\nTesting part two\n");
 	//get user input 
@@ -162,6 +328,12 @@ int main(){
 	char dayInput;
 	scanf(" %c", &dayInput);
 	query2(nameInput2,hourInput, dayInput);
+	*/
+	printf("\n\nTesting part three\n");
+	selectCourse("CS101");
+    projectStudentID_selectCourse("CS101");
+   	join_CDH_CR_onCourse();
+   	projectDayHour_CDH_CR("Turing Aud.");
 
 
 	

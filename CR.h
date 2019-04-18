@@ -13,6 +13,10 @@ extern int CR_hash(char* course);
 
 extern char* CR_getRoom(CR_LIST node);
 
+extern char* CR_getCourse(CR_LIST node);
+
+extern CR_LIST* CR_getAll();
+
 extern void CR_insert(char* course, char* room);
 
 extern LinkedList CR_keyLookup(char* course);

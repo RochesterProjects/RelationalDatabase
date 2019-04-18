@@ -14,6 +14,10 @@ extern char CDH_getDay(CDH_LIST this);
 
 extern char* CDH_getHour(CDH_LIST this);
 
+extern char* CDH_getCourse(CDH_LIST this);
+
+extern CDH_LIST* CDH_getAll();
+
 extern void CDH_insert(char* course, char day, char* hour);
 
 extern LinkedList CDH_keyLookup(char* course, char day, char* hour);

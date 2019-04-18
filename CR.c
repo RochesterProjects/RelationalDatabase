@@ -36,6 +36,10 @@ int CR_hash(char* course){
 char* CR_getRoom(CR_LIST node){
 	return node->room;
 }
+
+char* CR_getCourse(CR_LIST node){
+	return node->course;
+}
 void CR_insert(char* course, char* room){
 	CR_LIST this = new_CR(course,room);
 	int index = CR_hash(course);
@@ -125,6 +129,12 @@ void CR_delete(char* course, char* room){
 	}
 }
 
+CR_LIST* CR_getAll()
+{
+    return CR_HASHTABLE;
+}
+
+
 
 void CR_printSingle(CR_LIST node){
 	printf("%s \t %s\n", node->course, node->room);
@@ -159,6 +169,8 @@ void CR_print(){
 		}
 	}
 }
+
+
 
 /*
 int main(){
